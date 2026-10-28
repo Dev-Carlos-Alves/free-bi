@@ -1,0 +1,17 @@
+[package]
+name = "freebi-engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+polars = { version = "0.55", default-features = false, features = ["lazy", "csv", "parquet", "json", "strings", "temporal", "dtype-full", "is_in", "round_series", "cum_agg", "abs", "concat_str", "regex", "fmt", "rows", "diagonal_concat", "mode", "cross_join", "semi_anti_join", "dtype-date", "dtype-datetime", "timezones", "polars-io", "zip_with", "propagate_nans"] }
+calamine = { version = "0.37", features = ["dates"] }
+zip = { version = "9", default-features = false, features = ["deflate"] }
+encoding_rs = "0.8"
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+indexmap = { version = "2", features = ["serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4"] }

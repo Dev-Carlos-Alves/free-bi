@@ -1,0 +1,16 @@
+[package]
+name = "freebi-pbix"
+description = "Leitor de arquivos .pbix (Power BI) — layout do relatório e modelo VertiPaq"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+zip = { version = "9", default-features = false, features = ["deflate"] }
+rusqlite = { version = "0.41", features = ["bundled"] }
+
+[build-dependencies]
+cc = "1"
