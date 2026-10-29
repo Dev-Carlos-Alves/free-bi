@@ -2,3 +2,6 @@ target/
 node_modules/
 dist/
 *.freebi.tmp
+exemplos/
+*.pbix
+.venv/

@@ -31,8 +31,10 @@ fn main() -> anyhow::Result<()> {
     println!("por ano (date_part) {:?}", r.rows);
     let r = e.query(&VisualQuery { group_by: vec![f("dim_plataforma", "descricao_plataforma")], ..Default::default() })?;
     println!("slicer {:?}", r.rows);
-    e.save_project("/tmp/claude-0/-home-user/28b8deec-5693-576b-b322-630c59185d49/scratchpad/teste.freebi")?;
-    let e2 = Engine::load_project("/tmp/claude-0/-home-user/28b8deec-5693-576b-b322-630c59185d49/scratchpad/teste.freebi")?;
+    let tmp = std::env::temp_dir().join("teste.freebi");
+    let tmp = tmp.to_str().unwrap();
+    e.save_project(tmp)?;
+    let e2 = Engine::load_project(tmp)?;
     let r = e2.query(&VisualQuery { values: vec![m("Total de Jogos")], ..Default::default() })?;
     println!("após salvar/abrir: {:?}", r.rows);
     Ok(())
