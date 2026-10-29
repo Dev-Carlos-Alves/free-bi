@@ -1,13 +1,16 @@
 import { useEffect } from "react";
-import { getData, importPbix, newProject, openProject, refreshData, saveProject } from "./actions";
-import { Dialogs, openDialog } from "./components/dialogs";
+import { openProject, saveProject } from "./actions";
+import { Dialogs } from "./components/dialogs";
+import { Ribbon } from "./components/Ribbon";
 import { FieldsPane } from "./panes/FieldsPane";
 import { FiltersPane } from "./panes/FiltersPane";
+import { SelectionPane } from "./panes/SelectionPane";
 import { VisualizationsPane } from "./panes/VisualizationsPane";
+import { copyVisual, cutVisual, pasteVisual, removeVisual } from "./reportOps";
 import { useStore, type View } from "./store";
 import { DataView } from "./views/DataView";
 import { ModelView } from "./views/ModelView";
-import { remove, ReportView } from "./views/ReportView";
+import { ReportView } from "./views/ReportView";
 
 export function App() {
   const view = useStore((s) => s.view);
@@ -16,30 +19,46 @@ export function App() {
   const toast = useStore((s) => s.toast);
   const dirty = useStore((s) => s.dirty);
   const path = useStore((s) => s.projectPath);
-  const model = useStore((s) => s.model);
+  const panes = useStore((s) => s.prefs.panes);
 
   useEffect(() => {
     void useStore.getState().reloadModel();
     const onKey = (e: KeyboardEvent) => {
       const s = useStore.getState();
-      const typing = (e.target as HTMLElement).closest("input,textarea,select");
+      const typing = (e.target as HTMLElement | null)?.closest?.("input,textarea,select,[contenteditable]");
       const mod = e.ctrlKey || e.metaKey;
-      if (mod && e.key.toLowerCase() === "s") {
+      const key = e.key.toLowerCase();
+      const onReport = s.view === "report";
+      if (mod && key === "s") {
         e.preventDefault();
         void saveProject(e.shiftKey);
-      } else if (mod && e.key.toLowerCase() === "o") {
+      } else if (mod && key === "o") {
         e.preventDefault();
         void openProject();
-      } else if (!typing && mod && e.key.toLowerCase() === "z") {
+      } else if (typing) {
+        return;
+      } else if (mod && key === "z") {
         e.preventDefault();
         if (e.shiftKey) s.redo();
         else s.undo();
-      } else if (!typing && mod && e.key.toLowerCase() === "y") {
+      } else if (mod && key === "y") {
         e.preventDefault();
         s.redo();
-      } else if (!typing && (e.key === "Delete" || e.key === "Backspace") && s.selectedVisual && s.view === "report") {
+      } else if (onReport && mod && key === "c" && s.selectedVisual) {
         e.preventDefault();
-        remove(s.selectedVisual);
+        copyVisual();
+      } else if (onReport && mod && key === "x" && s.selectedVisual) {
+        e.preventDefault();
+        cutVisual();
+      } else if (onReport && mod && key === "v" && s.clipboard) {
+        e.preventDefault();
+        pasteVisual();
+      } else if (e.key === "Escape") {
+        if (s.painter) useStore.setState({ painter: null });
+        else if (s.focusVisual) useStore.setState({ focusVisual: null });
+      } else if (onReport && (e.key === "Delete" || e.key === "Backspace") && s.selectedVisual) {
+        e.preventDefault();
+        removeVisual(s.selectedVisual);
       }
     };
     const beforeUnload = (e: BeforeUnloadEvent) => {
@@ -63,36 +82,11 @@ export function App() {
     { v: "data", icon: "▦", label: "Dados" },
     { v: "model", icon: "⛓", label: "Modelo" },
   ];
-  const firstTable = model.tables[0]?.name;
+  const anyPane = panes.filters || panes.visualizations || panes.fields || panes.selection;
 
   return (
     <div className="app">
-      <header className="ribbon">
-        <div className="brand">
-          <span className="logo">▮▮▮</span> Free BI
-        </div>
-        <div className="rgroup">
-          <button onClick={newProject} title="Novo relatório">📄<span>Novo</span></button>
-          <button onClick={openProject} title="Abrir projeto .freebi (Ctrl+O)">📂<span>Abrir</span></button>
-          <button onClick={() => saveProject(false)} title="Salvar (Ctrl+S)">💾<span>Salvar</span></button>
-          <button onClick={() => saveProject(true)} title="Salvar como (Ctrl+Shift+S)">🗂<span>Salvar como</span></button>
-        </div>
-        <div className="rgroup">
-          <button className="accent" onClick={getData} title="CSV, Excel, Parquet, JSON">🛢<span>Obter dados</span></button>
-          <button onClick={importPbix} title="Abrir um relatório do Power BI (.pbix)">⇪<span>Importar .pbix</span></button>
-          <button onClick={refreshData} title="Recarregar arquivos de origem">⟳<span>Atualizar</span></button>
-        </div>
-        <div className="rgroup">
-          <button disabled={!firstTable} onClick={() => openDialog({ kind: "measure", table: firstTable! })}>ƒx<span>Nova medida</span></button>
-          <button disabled={!firstTable} onClick={() => openDialog({ kind: "calc-column", table: firstTable! })}>ƒ<span>Nova coluna</span></button>
-        </div>
-        <div className="rgroup">
-          <button onClick={() => useStore.getState().undo()} title="Desfazer (Ctrl+Z)">↶<span>Desfazer</span></button>
-          <button onClick={() => useStore.getState().redo()} title="Refazer (Ctrl+Y)">↷<span>Refazer</span></button>
-        </div>
-        <span className="grow" />
-        <button className="about" onClick={() => openDialog({ kind: "about" })}>?</button>
-      </header>
+      <Ribbon />
       <div className="body">
         <nav className="leftnav">
           {nav.map((n) => (
@@ -107,11 +101,12 @@ export function App() {
           {view === "data" && <DataView />}
           {view === "model" && <ModelView />}
         </main>
-        {view === "report" && (
+        {view === "report" && anyPane && (
           <aside className="panes">
-            <FiltersPane />
-            <VisualizationsPane />
-            <FieldsPane />
+            {panes.selection && <SelectionPane />}
+            {panes.filters && <FiltersPane />}
+            {panes.visualizations && <VisualizationsPane />}
+            {panes.fields && <FieldsPane />}
           </aside>
         )}
         {view === "data" && (

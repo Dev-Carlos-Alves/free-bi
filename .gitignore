@@ -5,3 +5,8 @@ dist/
 exemplos/
 *.pbix
 .venv/
+
+# arquivos locais da migração da sessão na nuvem e esquemas gerados pelo Tauri
+*.bundle
+_docs_originais/
+src-tauri/gen/

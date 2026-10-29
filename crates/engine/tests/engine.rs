@@ -94,3 +94,27 @@ fn etapas_e_projeto() {
     assert!(e2.table("vendas").unwrap().df.schema().contains("valor_total"));
     assert_eq!(e2.relationships.len(), 1);
 }
+
+#[test]
+fn relatorio_guarda_campos_novos_e_grava_texto() {
+    // A interface evolui o formato do relatório (estilo, camadas, imagem, tema); o motor deve guardar tudo sem perder campos.
+    let mut e = setup();
+    let report = json!({
+        "theme": { "name": "Teste", "colors": ["#123456"] },
+        "wallpaper": "#EEEEEE",
+        "pages": [{ "id": "p1", "name": "Página 1", "width": 1280, "height": 720, "background": "#FAFAFA",
+            "visuals": [{ "id": "v1", "type": "image", "x": 0, "y": 0, "w": 10, "h": 10, "fields": {}, "hidden": true,
+                "style": { "background": "#FFFFFF", "radius": 8 }, "options": { "src": "data:image/png;base64,AA==" } }] }]
+    });
+    e.handle("report_set", &json!({ "report": report })).unwrap();
+    let dir = std::env::temp_dir().join(format!("freebi-test-rel-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let path = dir.join("r.freebi");
+    e.save_project(path.to_str().unwrap()).unwrap();
+    let mut e2 = Engine::load_project(path.to_str().unwrap()).unwrap();
+    assert_eq!(e2.handle("report_get", &json!({})).unwrap(), report);
+
+    let tema = dir.join("tema.json");
+    e2.handle("write_text", &json!({ "path": tema.to_str().unwrap(), "text": "{\"name\":\"Tema\"}" })).unwrap();
+    assert_eq!(std::fs::read_to_string(&tema).unwrap(), "{\"name\":\"Tema\"}");
+}

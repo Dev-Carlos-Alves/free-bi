@@ -48,6 +48,21 @@
 - `.github/workflows/build.yml`: testes + instaladores no Ubuntu 22.04 (glibc antiga, roda no Fedora 44), Windows e macOS. Release automática em tags `v*`.
 - **O instalador ainda não foi testado num Fedora ou Windows real.** O build local do `.rpm` foi iniciado na nuvem e o resultado não foi confirmado.
 
+## 3.1 Sessão local no Windows (29/10/2026)
+- **Ambiente:** Rust 1.99.1 (MSVC) + VS Build Tools 2022 (C++) instalados. `cargo test -p freebi-engine -p freebi-pbix` passa (7 testes no motor; o leitor `.pbix` ainda não tem testes automatizados). `npx tauri dev` funciona.
+- **Conferência com o Power BI:** a página "Ranking de Jogos" bate linha a linha com o Power BI Desktop do usuário, inclusive o total (6.693.875 · 10.515.020.000 · 86,1%). Diferença corrigida: medida em branco numa tabela agora fica vazia (antes aparecia "(Em branco)"). As outras 3 páginas ainda não foram comparadas visualmente com o Power BI.
+- **Fase 1 da faixa de opções (inspirada no Power BI):**
+  - Abas Arquivo, Página Inicial, Inserir, Modelagem, Exibição e Design (`src/components/Ribbon.tsx`).
+  - Recortar/Copiar/Colar visual (Ctrl+X/C/V, entre páginas) e Pincel de formatação (copia `style` e opções visuais).
+  - Inserir: nova página, duplicar página, caixa de texto, formas (retângulo, arredondado, elipse, linha, seta), imagem (guardada como data URL no projeto, máx. 4 MB) e botões (voltar / ir para página; Ctrl+clique aciona, como no Power BI Desktop).
+  - Exibição: ajustar à página/largura/tamanho real, linhas de grade, ajustar à grade, bloquear objetos e mostrar/ocultar painéis, incluindo o novo painel **Seleção** (camadas, ordem, ocultar). As preferências ficam no `localStorage`, não no projeto.
+  - Cabeçalho da visual: funil com os filtros que afetam a visual, Modo de foco e menu "⋯" (exportar CSV, mostrar como tabela, classificar, trazer para frente/enviar para trás, ocultar, duplicar, excluir).
+  - Design: 6 temas prontos + o tema próprio do relatório (fica na galeria em `report.custom_theme`), importar/baixar tema JSON no formato do Power BI, tamanho da página, segundo plano da página e papel de parede.
+  - Formatar: plano de fundo, transparência, borda, cantos e sombra de qualquer visual; cor, tamanho e alinhamento do título.
+  - Lógica de edição em `src/reportOps.ts`. Motor: novo comando `write_text` (usado por "Baixar tema").
+- **Ícone:** opção "F de barras" (`src-tauri/icons/icon-source.svg`; os demais tamanhos saem de `npx tauri icon src-tauri/icons/icon-source.svg -o src-tauri/icons`).
+- **Instalador Windows:** NSIS em português (instala para o usuário ou para todos, com atalho no menu Iniciar) e MSI. O `.rpm` do Fedora não pode ser gerado no Windows: use o GitHub Actions (`.github/workflows/build.yml`) ou `npx tauri build --bundles rpm` no Fedora.
+
 ## 4. Próximos passos sugeridos (em ordem)
 1. **Rodar tudo localmente no Fedora:** `npm ci`, `cargo test -p freebi-engine -p freebi-pbix` (corrigir o que falhar), `npx tauri dev`, importar `BI_Steam_AVD.pbix`, comparar com o Power BI.
 2. **Gerar e instalar o `.rpm`** (`npx tauri build --bundles rpm`) e testar `sudo dnf install`. Depois, o mesmo no Windows (`npx tauri build --bundles msi,nsis`). Verificar a compilação do C (XPress9) com MSVC: há o `BUILD_STATIC` no `build.rs`.

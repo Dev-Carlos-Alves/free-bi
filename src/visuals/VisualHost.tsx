@@ -3,6 +3,7 @@ import { api } from "../api";
 import { planFor, sameField } from "../queryBuilder";
 import { useStore } from "../store";
 import type { FieldItem, Page, QueryResult, Visual } from "../types";
+import { ButtonVisual, ImageVisual, ShapeVisual } from "./Elements";
 import { CardVisual, GaugeVisual, SlicerVisual, TableVisual, TextVisual } from "./Basic";
 import { ChartVisual, DEFAULT_COLORS } from "./ChartVisual";
 
@@ -54,7 +55,9 @@ export function VisualHost({ visual, page }: { visual: Visual; page: Page }) {
   const fg = theme.foreground ?? "#1F2937";
 
   if (visual.type === "text") return <TextVisual visual={visual} fg={fg} />;
-  if (visual.type === "shape") return <div className="shape" />;
+  if (visual.type === "shape") return <ShapeVisual visual={visual} />;
+  if (visual.type === "image") return <ImageVisual visual={visual} />;
+  if (visual.type === "button") return <ButtonVisual visual={visual} />;
   if (visual.type === "unsupported")
     return <div className="muted pad center">Visual “{visual.source_type}” ainda não é suportado pelo Free BI.</div>;
   if (!plan) return <Placeholder visual={visual} />;
@@ -101,6 +104,11 @@ export function VisualHost({ visual, page }: { visual: Visual; page: Page }) {
       );
     default:
       if (result.rows.length === 0) return <div className="muted pad center">Sem dados para exibir</div>;
+      if (visual.options?.as_table) {
+        // "Mostrar como tabela": os mesmos dados do gráfico, em grade.
+        const asTable: Visual = { ...visual, fields: { columns: [...plan.keys, ...plan.vals] } };
+        return <TableVisual visual={asTable} plan={plan} result={result} model={model} accent={theme.table_accent ?? colors[0]} onSort={onSort} onSelect={onSelect} selected={mine} />;
+      }
       return <ChartVisual visual={visual} plan={plan} result={result} model={model} colors={colors} foreground={fg} selected={mine} onSelect={onSelect} />;
   }
 }

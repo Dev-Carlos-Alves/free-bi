@@ -1,81 +1,193 @@
-# Free BI
+<p align="center">
+  <img src="src-tauri/icons/icon-source.svg" width="120" alt="Ícone do Free BI">
+</p>
 
-Ferramenta de Business Intelligence **livre e multiplataforma** (Linux, Windows e macOS), com motor em **Rust** ([Polars](https://pola.rs)) e interface desktop em [Tauri](https://tauri.app).
+<h1 align="center">Free BI</h1>
 
-Ela nasceu de um problema real: fazer o relatório no Power BI em casa (Windows) e não conseguir abri-lo na faculdade (Fedora Linux).
+<p align="center">
+  <b>Business Intelligence livre, rápido e que abre o seu <code>.pbix</code> no Linux.</b><br>
+  Motor em Rust · Interface desktop · Fedora, Windows e macOS
+</p>
 
-## O que ela faz
+<p align="center">
+  <a href="#instalar">Instalar</a> ·
+  <a href="#o-que-ele-faz">Recursos</a> ·
+  <a href="#rodar-a-partir-do-código">Rodar do código</a> ·
+  <a href="#limitações-sinceramente">Limitações</a> ·
+  <a href="#sobre-o-autor">Sobre</a>
+</p>
+
+---
+
+## Por que o Free BI existe
+
+Fiz um trabalho da faculdade no **Power BI Desktop**, em casa, no Windows. Na aula, os computadores rodam **Fedora Linux**, e o Power BI Desktop não existe para Linux. Resultado: o relatório não abria.
+
+O Free BI resolve isso. Ele é um BI desktop que:
+
+- **abre arquivos `.pbix` do Power BI** com dados, medidas DAX, relações, páginas, visuais e tema;
+- **roda igual no Linux e no Windows**, e salva projetos `.freebi` que abrem nos dois;
+- deixa você **criar e editar relatórios do zero** com CSV, Excel, Parquet ou JSON.
+
+Ele não tenta substituir o Power BI inteiro (veja as [limitações](#limitações-sinceramente)). Ele cobre o que um relatório acadêmico ou de pequena empresa usa no dia a dia, com uma interface parecida o bastante para quem já conhece o Power BI.
+
+## O que ele faz
 
 | Área | Recursos |
 | --- | --- |
-| **Importar .pbix** | Abre arquivos do Power BI Desktop com o modelo importado: tabelas e dados (VertiPaq), medidas DAX, colunas calculadas, relações, "classificar por coluna", consultas M (só para consulta), páginas, visuais, segmentações e tema. |
-| **Obter dados** | CSV (detecta `;` ou `,`, vírgula decimal e Latin-1/UTF-8), Excel (`.xlsx`, `.xls`, `.ods`, escolhendo as planilhas), Parquet e JSON. |
-| **Transformar** | Etapas aplicadas no estilo Power Query: remover e renomear colunas, mudar o tipo, filtrar linhas, substituir valores, preencher vazios, remover duplicatas, aparar, maiúsculas e minúsculas, dividir coluna, ordenar, manter as primeiras linhas. |
-| **Modelo** | Relações muitos-para-um (com detecção automática), diagrama arrastável, relações ativas e inativas. |
-| **DAX** | Medidas e colunas calculadas: `SUM`, `AVERAGE`, `MEDIAN`, `COUNTROWS`, `DISTINCTCOUNT`, `SUMX`/`AVERAGEX`/`MEDIANX`/…, `CALCULATE` com filtros, `FILTER`, `ALL`/`REMOVEFILTERS`, `DIVIDE`, `IF`, `SWITCH`, `VAR`/`RETURN`, `RELATED`, `IN {…}`, funções de data e de texto, e outras. |
-| **Relatório** | Colunas, barras (agrupadas e empilhadas), linhas, área, combinação, pizza, rosca, funil, treemap, dispersão, cartão, medidor, tabela, matriz, segmentação (lista ou suspensa) e caixa de texto. Também filtro cruzado ao clicar, filtros de visual, página e relatório, hierarquia de datas, várias páginas, desfazer/refazer. |
-| **Projeto** | Arquivo `.freebi` (zip com JSON + Parquet) que abre igual no Linux e no Windows. |
+| **Importar `.pbix`** | Tabelas e dados (VertiPaq), medidas DAX, colunas calculadas, relações, "classificar por coluna", páginas, visuais, segmentações e tema. As consultas M ficam guardadas para referência. |
+| **Obter dados** | CSV (detecta `;` ou `,`, vírgula decimal e Latin-1/UTF-8), Excel (`.xlsx`, `.xls`, `.ods`), Parquet e JSON. |
+| **Transformar** | Etapas no estilo Power Query: remover e renomear colunas, mudar o tipo, filtrar, substituir, preencher vazios, remover duplicatas, aparar, maiúsculas e minúsculas, dividir coluna, ordenar, manter as primeiras linhas. |
+| **Modelo** | Relações muitos-para-um, com detecção automática, diagrama arrastável e relações ativas ou inativas. |
+| **DAX** | `SUM`, `AVERAGE`, `MEDIAN`, `COUNTROWS`, `DISTINCTCOUNT`, `SUMX`/`AVERAGEX`/`MEDIANX`/…, `CALCULATE` com filtros, `FILTER`, `ALL`/`REMOVEFILTERS`, `DIVIDE`, `IF`, `SWITCH`, `VAR`/`RETURN`, `RELATED`, `IN {…}`, funções de data e de texto, entre outras. |
+| **Visuais** | Colunas, barras, linhas, área, combinação, pizza, rosca, funil, treemap, dispersão, cartão, medidor, tabela, matriz, segmentação, caixa de texto, formas, imagem e botões de navegação. |
+| **Interação** | Filtro cruzado ao clicar, filtros de visual, de página e de relatório, hierarquia de datas, modo de foco, "mostrar como tabela" e exportar dados em CSV. |
+| **Faixa de opções** | Abas Arquivo, Página Inicial, Inserir, Modelagem, Exibição e Design. Inclui recortar, copiar e colar visuais, pincel de formatação, painel Seleção (camadas), linhas de grade, bloquear objetos, temas prontos e importação/exportação de tema JSON compatível com o Power BI. |
+| **Projeto** | Arquivo `.freebi` (zip com JSON e Parquet) que abre igual no Linux e no Windows. Desfazer e refazer em tudo. |
 
 ### Desempenho
 
-O `.pbix` de exemplo (7 tabelas, cerca de 257 mil linhas, 12 medidas) é importado em ~0,4 s. Os 12 cartões da primeira página são calculados em ~7 ms.
+Com o relatório de exemplo (7 tabelas, cerca de 257 mil linhas e 12 medidas), a importação do `.pbix` leva cerca de 0,4 s, e os 12 cartões da primeira página são calculados em cerca de 7 ms.
+
+### Fidelidade com o Power BI
+
+Os números foram conferidos contra o Power BI Desktop: os 12 cartões do relatório de teste batem com um cálculo independente, e a página de ranking bate linha a linha, inclusive no total.
 
 ## Instalar
 
-Os instaladores são gerados pelo GitHub Actions (aba **Actions**, ou **Releases** quando houver uma tag `v*`):
+Os instaladores ficam na página **[Releases](https://github.com/Dev-Carlos-Alves/free-bi/releases)**. Eles também são gerados a cada atualização na aba **Actions**.
 
-- **Fedora / RHEL:** `sudo dnf install ./Free.BI-0.1.0-1.x86_64.rpm`
-- **Ubuntu / Debian:** `sudo apt install ./Free.BI_0.1.0_amd64.deb`
-- **Qualquer Linux:** baixe o `.AppImage`, dê `chmod +x` e execute.
-- **Windows:** `.msi` ou `-setup.exe`.
+### Windows 10/11
 
-### Modo navegador (sem instalar nada)
+1. Baixe o `Free BI_x.y.z_x64-setup.exe`.
+2. Dê dois cliques e siga o assistente. Ele está em português, e dá para instalar só para você, sem precisar de administrador.
+3. Se o Windows mostrar "O Windows protegeu o computador", clique em **Mais informações** e depois em **Executar assim mesmo**. O aviso aparece porque o instalador não tem uma assinatura digital paga, não porque haja algum problema.
+4. Abra pelo menu Iniciar, procurando "Free BI".
 
-```bash
-cargo build --release -p freebi-web && npm ci && npm run build
-./target/release/freebi-web 7878 dist   # abra http://127.0.0.1:7878
-```
+Também existe a versão `.msi`, útil para instalar em vários computadores.
 
-## Desenvolvimento
-
-Requisitos: Rust estável, Node 20+. No Linux, também as bibliotecas do WebKitGTK:
+### Fedora (e RHEL, CentOS Stream, openSUSE)
 
 ```bash
-# Fedora
-sudo dnf install webkit2gtk4.1-devel gtk3-devel librsvg2-devel openssl-devel
-# Ubuntu
-sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev
+sudo dnf install ./Free.BI-x.y.z-1.x86_64.rpm
 ```
+
+O `dnf` instala sozinho as dependências (WebKitGTK e GTK 3). Depois, procure "Free BI" no menu de aplicativos.
+
+Para desinstalar:
 
 ```bash
-npm ci
-npx tauri dev          # app desktop com recarga automática
-npx tauri build        # gera os instaladores em target/release/bundle
-cargo test -p freebi-engine -p freebi-pbix
+sudo dnf remove free-bi
 ```
 
-### Estrutura
+### Ubuntu e Debian
+
+```bash
+sudo apt install ./Free.BI_x.y.z_amd64.deb
+```
+
+### Qualquer outro Linux (AppImage)
+
+```bash
+chmod +x Free.BI_x.y.z_amd64.AppImage
+./Free.BI_x.y.z_amd64.AppImage
+```
+
+### macOS
+
+Baixe o `.dmg` e arraste o Free BI para Aplicativos. Ainda não foi testado num Mac de verdade.
+
+## Primeiros passos
+
+1. Abra o Free BI e clique em **Importar relatório do Power BI (.pbix)**. Se não tiver um `.pbix`, use **Obter dados** e escolha um CSV ou uma planilha do Excel.
+2. Navegue pelas páginas nas abas de baixo. Clique numa barra ou numa linha da tabela para filtrar as outras visuais.
+3. Para criar uma visual, escolha um tipo no painel **Visualizações** e arraste campos do painel **Dados**.
+4. Salve com **Ctrl+S**. O arquivo `.freebi` abre em qualquer computador com o Free BI, no Linux ou no Windows.
+
+Atalhos úteis: **Ctrl+C / Ctrl+X / Ctrl+V** (copiar, recortar e colar visuais), **Ctrl+Z / Ctrl+Y** (desfazer e refazer), **Delete** (excluir visual), **Esc** (sair do modo de foco ou do pincel) e **Ctrl+clique** num botão (acioná-lo durante a edição).
+
+## Rodar a partir do código
+
+### O que você precisa
+
+| | Fedora | Windows |
+| --- | --- | --- |
+| Rust estável | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` | [rustup.rs](https://rustup.rs) (toolchain MSVC) |
+| Node.js 20+ | `sudo dnf install nodejs npm` | [nodejs.org](https://nodejs.org) |
+| Compilador C/C++ | `sudo dnf install gcc gcc-c++ make` | Visual Studio Build Tools, com "Desenvolvimento para desktop com C++" |
+| Bibliotecas do sistema | `sudo dnf install webkit2gtk4.1-devel gtk3-devel librsvg2-devel openssl-devel libappindicator-gtk3-devel rpm-build` | O WebView2 já vem no Windows 10/11 |
+
+No Ubuntu, as bibliotecas do sistema são instaladas com `sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev`.
+
+### Comandos
+
+```bash
+git clone https://github.com/Dev-Carlos-Alves/free-bi.git
+cd free-bi
+npm ci                                       # dependências da interface
+npx tauri dev                                # abre o app em modo de desenvolvimento
+cargo test -p freebi-engine -p freebi-pbix   # testes do motor e do leitor de .pbix
+```
+
+A primeira compilação demora: o Polars é grande. Conte de 10 a 20 minutos. Depois disso, recompila em segundos.
+
+### Gerar o instalador
+
+| Sistema | Comando | Onde fica |
+| --- | --- | --- |
+| Fedora | `npx tauri build --bundles rpm` | `target/release/bundle/rpm/` |
+| Ubuntu/Debian | `npx tauri build --bundles deb,appimage` | `target/release/bundle/deb/` e `appimage/` |
+| Windows | `npx tauri build --bundles nsis,msi` | `target\release\bundle\nsis\` e `msi\` |
+
+Cada sistema gera os próprios instaladores: o `.rpm` sai do Linux e o `.exe` sai do Windows. O GitHub Actions (`.github/workflows/build.yml`) gera todos de uma vez.
+
+### Modo navegador (sem app desktop)
+
+```bash
+npm ci && npm run build
+cargo run --release -p freebi-web -- 7878 dist   # depois abra http://127.0.0.1:7878
+```
+
+### Como o código está organizado
 
 ```
 crates/pbix/     leitor de .pbix: XPress9 (C, MIT, Microsoft) → backup ABF → SQLite de metadados → colunas VertiPaq
 crates/engine/   motor: carga de dados, etapas, DAX → Polars, consultas das visuais, projeto .freebi
-crates/server/   servidor HTTP (modo navegador)
-src-tauri/       app desktop
-src/             interface (React + ECharts)
+crates/server/   servidor HTTP (modo navegador e testes)
+src-tauri/       app desktop (Tauri 2)
+src/             interface (React 19 + ECharts 6 + zustand)
+docs/            histórico do projeto, decisões e próximos passos
 ```
 
-## Limitações conhecidas (sinceramente)
+A interface conversa com o motor por um único ponto de entrada (`Engine::handle(cmd, args)`), tanto no app desktop quanto no modo navegador.
 
-- **Não substitui o Power BI por completo.** Ficam de fora: Power Query M completo (os passos M do `.pbix` não são reexecutados, e os dados vêm já processados do modelo), DirectQuery/conexão ao vivo, publicação no serviço, mapas, visuais personalizados, segurança em nível de linha, inteligência de tempo (`SAMEPERIODLASTYEAR`, `TOTALYTD`…), relações muitos-para-muitos e filtro bidirecional.
+## Limitações (sinceramente)
+
+- **Não substitui o Power BI por completo.** Ficam de fora: Power Query M completo (os passos M do `.pbix` não são reexecutados, e os dados vêm prontos do modelo), DirectQuery e conexão ao vivo, publicação no serviço, mapas, visuais personalizados, segurança em nível de linha, inteligência de tempo (`SAMEPERIODLASTYEAR`, `TOTALYTD`…), relações muitos-para-muitos e filtro bidirecional.
+- **Não salva de volta em `.pbix`.** Isso exigiria reescrever o formato interno do Power BI de forma confiável. Use o `.freebi` e, se precisar voltar ao Power BI, exporte os dados em CSV.
 - `ALL`/`REMOVEFILTERS` dentro de `CALCULATE` removem o agrupamento da visual, mas mantêm os filtros de página e de segmentação (comportamento de `ALLSELECTED`).
 - Colunas calculadas vindas do `.pbix` são importadas como valores prontos. A expressão fica guardada só para referência.
-- A importação de `.pbix` foi validada com o formato de relatório novo (PBIR) e com o modelo compactado em XPress9. O layout legado (`Report/Layout`) é lido em modo de melhor esforço.
-- Modelos do Excel/Power Pivot com compressão XPress8 por arquivo ainda não são suportados.
+- O layout de relatório novo (PBIR) é lido por completo. O layout legado (`Report/Layout`) é lido em modo de melhor esforço.
+- Modelos do Excel/Power Pivot com compressão XPress8 ainda não são suportados.
 
-## Créditos e licenças
+Os próximos passos planejados estão em [`docs/HANDOFF.md`](docs/HANDOFF.md).
 
-- Descompressor XPress9: código da Microsoft sob licença MIT (`crates/pbix/vendor/xpress9`, via [xpress9-python](https://github.com/Hugoberry/xpress9-python)).
-- Formato do modelo: especificação pública [MS-XLDM] e o trabalho de engenharia reversa do projeto [PBIXRay](https://github.com/Hugoberry/pbixray) (MIT), usado como referência e para validar os resultados.
-- Projeto não afiliado à Microsoft. "Power BI" é marca da Microsoft.
+## Agradecimentos
 
-Licença: MIT.
+- **[PBIXRay](https://github.com/Hugoberry/pbixray)** e **[xpress9-python](https://github.com/Hugoberry/xpress9-python)**, de Igor Cotruta (Hugoberry), ambos sob licença MIT. Foram a referência para entender o formato do `.pbix` e para validar cada coluna lida pelo Free BI.
+- **Microsoft**, pelo descompressor XPress9 publicado sob licença MIT e pela especificação pública [MS-XLDM].
+- **[Polars](https://pola.rs)**, **[Tauri](https://tauri.app)**, **[Apache ECharts](https://echarts.apache.org)**, **[React](https://react.dev)** e **[calamine](https://github.com/tafia/calamine)**, que fazem o trabalho pesado.
+- **Faculdade Nova Roma**, onde nasceu o relatório de teste (Data Mart de jogos da Steam, projeto AVD) que motivou e validou o projeto.
+- **[Claude](https://claude.ai)** (Anthropic), parceiro de programação no desenvolvimento.
+
+## Sobre o autor
+
+Feito por **Carlos Alves** ([@Dev-Carlos-Alves](https://github.com/Dev-Carlos-Alves)), estudante da Faculdade Nova Roma, que precisava abrir um relatório do Power BI no Linux e acabou construindo um BI.
+
+Sugestões, problemas e contribuições são bem-vindos nas [Issues](https://github.com/Dev-Carlos-Alves/free-bi/issues).
+
+## Licença
+
+[MIT](LICENSE). Use, modifique e distribua à vontade.
+
+O Free BI não é afiliado à Microsoft. "Power BI" é marca registrada da Microsoft.

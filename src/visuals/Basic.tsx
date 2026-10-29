@@ -47,6 +47,9 @@ export function GaugeVisual({ plan, result, model, color }: { plan: Plan; result
   );
 }
 
+/** Valor em branco numa célula de valor fica vazio, como no Power BI ("(Em branco)" só nas categorias). */
+const cell = (v: unknown, format: string | null) => (v === null || v === undefined ? "" : formatValue(v, { format }));
+
 interface TableProps {
   visual: Visual;
   plan: Plan;
@@ -90,7 +93,7 @@ export function TableVisual({ visual, plan, result, model, accent, onSort, onSel
                   <td key={i} className={isKey ? "" : "num"}>
                     {isKey
                       ? formatCategory(row[idx], f.date_part, f.date_part ? "integer" : columnDtype(model, f))
-                      : formatValue(row[idx], { format: measureFormat(model, f) })}
+                      : cell(row[idx], measureFormat(model, f))}
                   </td>
                 ))}
               </tr>
@@ -102,7 +105,7 @@ export function TableVisual({ visual, plan, result, model, accent, onSort, onSel
             <tr>
               {order.map(({ f, idx, isKey }, i) => (
                 <td key={i} className={isKey ? "" : "num"}>
-                  {i === 0 && isKey ? "Total" : isKey ? "" : formatValue(result.total![idx], { format: measureFormat(model, f) })}
+                  {i === 0 && isKey ? "Total" : isKey ? "" : cell(result.total![idx], measureFormat(model, f))}
                 </td>
               ))}
             </tr>

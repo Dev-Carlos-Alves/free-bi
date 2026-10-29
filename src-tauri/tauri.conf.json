@@ -32,6 +32,14 @@
     "fileAssociations": [
       { "ext": ["freebi"], "name": "Projeto Free BI", "description": "Projeto do Free BI", "role": "Editor", "mimeType": "application/x-freebi" }
     ],
+    "windows": {
+      "nsis": {
+        "languages": ["PortugueseBR", "English"],
+        "installMode": "both",
+        "startMenuFolder": "Free BI"
+      },
+      "wix": { "language": "pt-BR" }
+    },
     "linux": {
       "rpm": { "depends": ["webkit2gtk4.1", "gtk3"] },
       "deb": { "depends": ["libwebkit2gtk-4.1-0", "libgtk-3-0"] }

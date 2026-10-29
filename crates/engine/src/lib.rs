@@ -207,6 +207,11 @@ impl Engine {
                 std::fs::write(&path, out)?;
                 json!({ "rows": r.rows.len() })
             }
+            "write_text" => {
+                // Grava um arquivo de texto escolhido pelo usuário (ex.: tema JSON exportado).
+                std::fs::write(arg::<String>(args, "path")?, arg::<String>(args, "text")?)?;
+                Value::Null
+            }
             "table_page" => {
                 let table: String = arg(args, "table")?;
                 let offset = opt::<usize>(args, "offset").unwrap_or(0);

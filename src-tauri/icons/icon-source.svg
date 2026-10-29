@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Ícone do Free BI: o "F" desenhado como um gráfico de barras horizontais. Fonte para `npx tauri icon`. -->
+  <rect x="40" y="40" width="944" height="944" rx="216" fill="#0F766E"/>
+  <rect x="262" y="236" width="124" height="560" rx="30" fill="#F0FDFA"/>
+  <rect x="262" y="236" width="520" height="124" rx="30" fill="#F0FDFA"/>
+  <rect x="262" y="452" width="350" height="124" rx="30" fill="#5EEAD4"/>
+  <rect x="660" y="452" width="96" height="124" rx="30" fill="#FBBF24"/>
+</svg>

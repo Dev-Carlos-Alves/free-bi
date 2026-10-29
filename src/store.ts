@@ -5,6 +5,18 @@ import { api } from "./api";
 import type { FieldItem, Model, Page, Report, Visual } from "./types";
 
 export type View = "report" | "data" | "model";
+export type RibbonTab = "file" | "home" | "insert" | "modeling" | "view" | "design";
+/** Exibição › Ajustar: página inteira, largura ou tamanho real (100%). */
+export type FitMode = "page" | "width" | "actual";
+
+/** Preferências de exibição (não vão para o projeto). */
+export interface ViewPrefs {
+  fit: FitMode;
+  gridlines: boolean;
+  snap: boolean;
+  lock: boolean;
+  panes: { filters: boolean; visualizations: boolean; fields: boolean; selection: boolean };
+}
 
 export interface CrossFilter {
   visualId: string;
@@ -27,8 +39,19 @@ interface State {
   busy: string | null;
   history: Report[];
   future: Report[];
+  ribbonTab: RibbonTab;
+  prefs: ViewPrefs;
+  /** Visuais copiadas/recortadas (Área de transferência). */
+  clipboard: Visual[] | null;
+  /** Estilo capturado pelo Pincel de formatação, aguardando o clique na visual de destino. */
+  painter: Pick<Visual, "style" | "options"> | null;
+  /** Visual aberta em Modo de foco. */
+  focusVisual: string | null;
+  /** Páginas visitadas, para o botão "Voltar". */
+  pageTrail: number[];
 
   setView: (v: View) => void;
+  setPrefs: (fn: (p: ViewPrefs) => ViewPrefs) => void;
   setPage: (i: number) => void;
   select: (id: string | null) => void;
   setCrossFilter: (cf: CrossFilter | null) => void;
@@ -42,6 +65,25 @@ interface State {
   markSaved: () => void;
   undo: () => void;
   redo: () => void;
+}
+
+const PREFS_KEY = "freebi.prefs";
+const DEFAULT_PREFS: ViewPrefs = {
+  fit: "page",
+  gridlines: false,
+  snap: true,
+  lock: false,
+  panes: { filters: true, visualizations: true, fields: true, selection: false },
+};
+
+function loadPrefs(): ViewPrefs {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PREFS_KEY) ?? "null") as Partial<ViewPrefs> | null;
+    if (raw) return { ...DEFAULT_PREFS, ...raw, panes: { ...DEFAULT_PREFS.panes, ...raw.panes } };
+  } catch {
+    // preferências corrompidas ou armazenamento bloqueado: usa o padrão
+  }
+  return DEFAULT_PREFS;
 }
 
 export const emptyReport = (): Report => ({
@@ -63,9 +105,31 @@ export const useStore = create<State>((set, get) => ({
   busy: null,
   history: [],
   future: [],
+  ribbonTab: "home",
+  prefs: loadPrefs(),
+  clipboard: null,
+  painter: null,
+  focusVisual: null,
+  pageTrail: [],
 
   setView: (view) => set({ view }),
-  setPage: (pageIndex) => set({ pageIndex, selectedVisual: null, crossFilter: null }),
+  setPrefs: (fn) => {
+    const prefs = fn(get().prefs);
+    set({ prefs });
+    try {
+      localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+    } catch {
+      // armazenamento indisponível: as preferências valem só nesta sessão
+    }
+  },
+  setPage: (pageIndex) =>
+    set((s) => ({
+      pageIndex,
+      selectedVisual: null,
+      crossFilter: null,
+      focusVisual: null,
+      pageTrail: pageIndex === s.pageIndex ? s.pageTrail : [...s.pageTrail.slice(-19), s.pageIndex],
+    })),
   select: (selectedVisual) => set({ selectedVisual }),
   setCrossFilter: (crossFilter) => set({ crossFilter }),
   reloadModel: async () => {

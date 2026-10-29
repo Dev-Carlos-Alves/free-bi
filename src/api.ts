@@ -84,6 +84,7 @@ export const api = {
   queries: (queries: VisualQuery[]) => call<({ ok: QueryResult } | { error: string })[]>("queries", { queries }),
   query: (query: VisualQuery) => call<QueryResult>("query", { query }),
   exportCsv: (query: VisualQuery, path: string) => call<{ rows: number }>("export_csv", { query, path }),
+  writeText: (path: string, text: string) => call("write_text", { path, text }),
   tablePage: (table: string, offset: number, limit: number, sort?: string | null, desc?: boolean) =>
     call<QueryResult>("table_page", { table, offset, limit, sort, desc }),
   excelSheets: (path: string) => call<string[]>("excel_sheets", { path }),

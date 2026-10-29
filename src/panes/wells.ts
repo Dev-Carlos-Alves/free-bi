@@ -70,6 +70,8 @@ export function wellsFor(t: VisualType): WellDef[] {
       ];
     case "text":
     case "shape":
+    case "image":
+    case "button":
     case "unsupported":
       return [];
     default:

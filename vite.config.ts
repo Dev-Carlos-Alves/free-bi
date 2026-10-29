@@ -5,6 +5,12 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   clearScreen: false,
-  server: { port: 1420, strictPort: true, proxy: { "/api": "http://127.0.0.1:7878" } },
+  server: {
+    port: 1420,
+    strictPort: true,
+    proxy: { "/api": "http://127.0.0.1:7878" },
+    // A saída do Cargo fica travada durante a compilação (EBUSY no Windows) e não é frontend.
+    watch: { ignored: ["**/target/**", "**/src-tauri/**", "**/crates/**"] },
+  },
   build: { target: "es2022", chunkSizeWarningLimit: 2000 },
 });

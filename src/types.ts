@@ -122,7 +122,26 @@ export interface FieldItem {
 export type VisualType =
   | "column" | "stacked_column" | "bar" | "stacked_bar" | "line" | "area" | "combo"
   | "pie" | "donut" | "card" | "table" | "matrix" | "slicer" | "text" | "scatter"
-  | "gauge" | "funnel" | "treemap" | "shape" | "unsupported";
+  | "gauge" | "funnel" | "treemap" | "shape" | "image" | "button" | "unsupported";
+
+export type ShapeKind = "rect" | "rounded" | "ellipse" | "line" | "arrow";
+
+/** Ação de um botão (Inserir › Botões). */
+export type ButtonAction = { kind: "page"; page_id: string } | { kind: "back" } | { kind: "none" };
+
+/** Aparência do contêiner da visual (copiada pelo Pincel de formatação). */
+export interface VisualStyle {
+  background?: string | null;
+  /** 0–100: transparência do plano de fundo. */
+  transparency?: number;
+  border_color?: string | null;
+  border_width?: number;
+  radius?: number;
+  shadow?: boolean;
+  title_color?: string | null;
+  title_size?: number | null;
+  title_align?: "left" | "center" | "right";
+}
 
 export interface TextRun {
   value: string;
@@ -146,10 +165,26 @@ export interface Visual {
   options?: {
     slicer_mode?: string | null;
     labels?: boolean;
+    /** Formas. */
+    shape?: ShapeKind;
+    fill?: string | null;
+    line_color?: string | null;
+    line_width?: number;
+    /** Imagem (data URL) e ajuste. */
+    src?: string | null;
+    fit?: "contain" | "cover" | "fill";
+    /** Botão. */
+    action?: ButtonAction;
+    label?: string | null;
+    /** Exibir os dados do gráfico como tabela (menu "..."). */
+    as_table?: boolean;
     [k: string]: unknown;
   };
   /** Filtros desta visual. */
   filters?: ReportFilter[];
+  /** Oculta no painel Seleção (a visual continua filtrando, como no Power BI). */
+  hidden?: boolean;
+  style?: VisualStyle;
 }
 
 export type Well = "category" | "values" | "values2" | "legend" | "rows" | "columns";
@@ -170,6 +205,8 @@ export interface Page {
   height: number;
   visuals: Visual[];
   filters?: ReportFilter[];
+  /** Segundo plano da página (sobrepõe o do tema). */
+  background?: string | null;
 }
 
 export interface Theme {
@@ -186,6 +223,10 @@ export interface Report {
   theme?: Theme | null;
   pages: Page[];
   filters?: ReportFilter[];
+  /** Último tema próprio (importado do .pbix ou de um JSON), para poder voltar a ele pela galeria. */
+  custom_theme?: Theme | null;
+  /** Papel de parede: área em volta da página. */
+  wallpaper?: string | null;
   /** Posições das tabelas na visão Modelo. */
   model_layout?: Record<string, { x: number; y: number }>;
 }
