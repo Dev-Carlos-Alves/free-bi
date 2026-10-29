@@ -6,6 +6,10 @@ on:
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag já existente para publicar a release (ex.: v0.1.0). Vazio = só gerar os instaladores."
+        required: false
 
 jobs:
   test:
@@ -33,6 +37,9 @@ jobs:
           - os: macos-latest
             args: "--bundles dmg"
     runs-on: ${{ matrix.os }}
+    # Sem isso o GITHUB_TOKEN é só leitura e a criação da release dá 403.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -58,9 +65,10 @@ jobs:
             target/release/bundle/**/*.exe
             target/release/bundle/**/*.dmg
       - name: Publicar na release (tags v*)
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.tag != ''
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
           files: |
             target/release/bundle/**/*.deb
             target/release/bundle/**/*.rpm
