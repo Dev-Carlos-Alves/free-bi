@@ -1,0 +1,15 @@
+[package]
+name = "freebi-web"
+description = "Free BI no navegador: servidor HTTP local com o mesmo motor do app desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+freebi-engine.workspace = true
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net"] }
+tower-http = { version = "0.7", features = ["fs"] }

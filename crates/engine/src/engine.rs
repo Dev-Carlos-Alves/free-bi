@@ -331,11 +331,26 @@ impl Engine {
         }
 
         let nk = key_exprs.len();
+        // "Classificar por coluna" (ex.: nome do mês ordenado pelo número do mês).
+        let mut hidden: Vec<Expr> = Vec::new();
+        let mut key_sort: Vec<String> = Vec::new();
+        for (i, g) in q.group_by.iter().enumerate() {
+            let sc = if g.date_part.is_none() { self.tables.get(&g.table).and_then(|t| t.meta.sort_by.get(&g.column)) } else { None };
+            match sc {
+                Some(sc) if self.tables[&g.table].df.schema().contains(sc) => {
+                    hidden.push(col(qual(&g.table, sc)).min().alias(format!("__sk{i}")));
+                    key_sort.push(format!("__sk{i}"));
+                }
+                _ => key_sort.push(format!("k{i}")),
+            }
+        }
         let mut df = if nk > 0 {
-            if value_exprs.is_empty() {
+            if value_exprs.is_empty() && hidden.is_empty() {
                 lf.select(key_exprs.clone()).unique(None, UniqueKeepStrategy::Any).collect()?
             } else {
-                lf.group_by(key_exprs.clone()).agg(value_exprs.clone()).collect()?
+                let mut aggs = value_exprs.clone();
+                aggs.extend(hidden.iter().cloned());
+                lf.group_by(key_exprs.clone()).agg(aggs).collect()?
             }
         } else {
             lf.select(value_exprs.clone()).collect()?
@@ -348,25 +363,28 @@ impl Engine {
         }
 
         // Ordenação.
-        let width = df.width();
+        let width = nk + q.values.len();
         let sort_col = match q.sort_by {
             Some(i) if i < width => Some(i),
             _ if nk > 0 => Some(0),
             _ => None,
         };
         if let Some(i) = sort_col {
-            let name = df.get_column_names()[i].to_string();
+            let name = if i < nk { key_sort[i].clone() } else { format!("v{}", i - nk) };
             let desc = q.sort_by.is_some() && q.sort_desc;
             let mut by = vec![name.clone()];
             let mut descs = vec![desc];
-            for k in 0..nk {
-                let kn = format!("k{k}");
-                if kn != name {
-                    by.push(kn);
+            for kn in &key_sort {
+                if *kn != name {
+                    by.push(kn.clone());
                     descs.push(false);
                 }
             }
             df = df.sort(by, SortMultipleOptions::default().with_order_descending_multi(descs).with_nulls_last(true))?;
+        }
+        if !hidden.is_empty() {
+            let names: Vec<String> = (0..nk).map(|i| format!("__sk{i}")).filter(|n| df.schema().contains(n)).collect();
+            df = df.drop_many(names);
         }
         let row_count = df.height();
         if let Some(l) = q.limit {

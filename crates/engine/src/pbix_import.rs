@@ -197,6 +197,7 @@ impl Engine {
                 calc_columns: vec![],
                 imported_calc_columns: imported,
                 origin_query: p.queries.iter().find(|q| q.table == t.name).map(|q| q.expression.clone()),
+                sort_by: p.sort_by_columns.iter().filter(|s| s.table == t.name).map(|s| (s.column.clone(), s.sort_by.clone())).collect(),
             };
             self.tables.insert(t.name.clone(), crate::engine::Table { meta, df: df.clone(), raw: df, errors: vec![] });
         }

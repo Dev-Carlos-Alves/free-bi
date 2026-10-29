@@ -94,6 +94,7 @@ export const api = {
     call<Relationship>("add_relationship", { relationship: { id: "", ...relationship } }),
   deleteRelationship: (id: string) => call("delete_relationship", { id }),
   setRelationshipActive: (id: string, active: boolean) => call("set_relationship_active", { id, active }),
+  setSortBy: (table: string, column: string, by: string | null) => call("set_sort_by", { table, column, by }),
   detectRelationships: () => call<Relationship[]>("detect_relationships"),
   columnStats: (table: string, column: string) =>
     call<{ count: number; nulls: number; distinct: number; min: number | null; max: number | null }>("column_stats", { table, column }),

@@ -47,7 +47,15 @@ pub struct QueryDef {
     pub expression: String,
 }
 
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct SortByDef {
+    pub table: String,
+    pub column: String,
+    pub sort_by: String,
+}
+
 pub struct Metadata {
+    pub sort_by_columns: Vec<SortByDef>,
     pub tables: Vec<String>,
     pub columns: Vec<ColumnSchema>,
     pub measures: Vec<MeasureDef>,
@@ -225,5 +233,16 @@ fn read_db(db: &Connection) -> Result<Metadata> {
         }
     }
 
-    Ok(Metadata { tables, columns, measures, calc_columns, relationships, queries })
+    let mut sort_by_columns = Vec::new();
+    if has_column(db, "Column", "SortByColumnID") {
+        let mut st = db.prepare(
+            "SELECT t.Name, COALESCE(c.ExplicitName, c.InferredName), COALESCE(sc.ExplicitName, sc.InferredName)
+             FROM Column c JOIN [Table] t ON c.TableID = t.ID JOIN Column sc ON sc.ID = c.SortByColumnID",
+        )?;
+        for r in st.query_map([], |r| Ok(SortByDef { table: r.get(0)?, column: r.get(1)?, sort_by: r.get(2)? }))? {
+            sort_by_columns.push(r?);
+        }
+    }
+
+    Ok(Metadata { sort_by_columns, tables, columns, measures, calc_columns, relationships, queries })
 }

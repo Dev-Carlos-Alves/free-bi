@@ -144,6 +144,7 @@ impl Engine {
                     "calc_columns": t.meta.calc_columns,
                     "imported_calc_columns": t.meta.imported_calc_columns,
                     "origin_query": t.meta.origin_query,
+                    "sort_by": t.meta.sort_by,
                     "errors": t.errors,
                 })
             })
@@ -347,6 +348,17 @@ impl Engine {
                 }
                 Value::Null
             }
+            "set_sort_by" => {
+                let table: String = arg(args, "table")?;
+                let column: String = arg(args, "column")?;
+                let by: Option<String> = opt(args, "by");
+                let t = self.table_mut(&table)?;
+                match by {
+                    Some(b) if !b.is_empty() => t.meta.sort_by.insert(column, b),
+                    _ => t.meta.sort_by.remove(&column),
+                };
+                Value::Null
+            }
             "detect_relationships" => serde_json::to_value(self.detect_relationships())?,
             "column_stats" => {
                 let t = self.table(&arg::<String>(args, "table")?)?;
@@ -367,7 +379,7 @@ impl Engine {
 }
 
 fn meta(name: &str, source: Source) -> TableMeta {
-    TableMeta { name: name.into(), source, steps: vec![], calc_columns: vec![], imported_calc_columns: vec![], origin_query: None }
+    TableMeta { name: name.into(), source, steps: vec![], calc_columns: vec![], imported_calc_columns: vec![], origin_query: None, sort_by: Default::default() }
 }
 
 /// Atualiza `Tabela[...]`/`'Tabela'[...]` numa expressão DAX após renomear a tabela.

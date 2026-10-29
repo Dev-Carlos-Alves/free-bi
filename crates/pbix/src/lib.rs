@@ -11,7 +11,7 @@ pub mod report;
 mod vertipaq;
 mod xml;
 
-pub use meta::{CalcColumnDef, MeasureDef, QueryDef, RelationshipDef};
+pub use meta::{CalcColumnDef, MeasureDef, QueryDef, RelationshipDef, SortByDef};
 pub use report::{FieldProj, PageDef, ReportDef, VisualDef};
 
 use anyhow::{anyhow, Context, Result};
@@ -62,6 +62,7 @@ pub struct Pbix {
     pub calc_columns: Vec<CalcColumnDef>,
     pub relationships: Vec<RelationshipDef>,
     pub queries: Vec<QueryDef>,
+    pub sort_by_columns: Vec<SortByDef>,
     /// Avisos não fatais (colunas que não puderam ser lidas etc.).
     pub warnings: Vec<String>,
 }
@@ -87,6 +88,7 @@ pub fn read<R: Read + Seek>(r: R) -> Result<Pbix> {
                 calc_columns: vec![],
                 relationships: vec![],
                 queries: vec![],
+                sort_by_columns: vec![],
                 warnings,
             });
         }
@@ -122,6 +124,7 @@ pub fn read<R: Read + Seek>(r: R) -> Result<Pbix> {
         calc_columns: meta.calc_columns.iter().filter(|c| keep(&c.table)).cloned().collect(),
         relationships: meta.relationships.iter().filter(|r| keep(&r.from_table) && keep(&r.to_table)).cloned().collect(),
         queries: meta.queries.iter().filter(|q| keep(&q.table)).cloned().collect(),
+        sort_by_columns: meta.sort_by_columns.iter().filter(|s| keep(&s.table)).cloned().collect(),
         tables,
         warnings,
     })

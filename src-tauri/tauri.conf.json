@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Free BI",
+  "version": "0.1.0",
+  "identifier": "io.github.devcarlosalves.freebi",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Free BI",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 1024,
+        "minHeight": 640,
+        "maximized": true
+      }
+    ],
+    "security": { "csp": null }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb", "rpm", "appimage", "msi", "nsis", "dmg"],
+    "category": "Productivity",
+    "shortDescription": "BI livre e multiplataforma",
+    "longDescription": "Ferramenta de Business Intelligence com motor em Rust: carrega CSV/Excel/Parquet/JSON, importa .pbix, medidas DAX, relações e painéis interativos.",
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
+    "fileAssociations": [
+      { "ext": ["freebi"], "name": "Projeto Free BI", "description": "Projeto do Free BI", "role": "Editor", "mimeType": "application/x-freebi" }
+    ],
+    "linux": {
+      "rpm": { "depends": ["webkit2gtk4.1", "gtk3"] },
+      "deb": { "depends": ["libwebkit2gtk-4.1-0", "libgtk-3-0"] }
+    }
+  }
+}

@@ -122,6 +122,9 @@ pub struct TableMeta {
     /// Consulta Power Query (M) original, quando importada de um .pbix.
     #[serde(default)]
     pub origin_query: Option<String>,
+    /// Classificar por coluna: coluna → coluna usada na ordenação.
+    #[serde(default)]
+    pub sort_by: std::collections::BTreeMap<String, String>,
 }
 
 /// Referência a uma coluna, com parte de data opcional (hierarquia de datas).

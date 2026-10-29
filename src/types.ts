@@ -24,6 +24,7 @@ export interface TableModel {
   calc_columns: CalcColumn[];
   imported_calc_columns: CalcColumn[];
   origin_query: string | null;
+  sort_by: Record<string, string>;
   errors: string[];
 }
 
@@ -185,6 +186,8 @@ export interface Report {
   theme?: Theme | null;
   pages: Page[];
   filters?: ReportFilter[];
+  /** Posições das tabelas na visão Modelo. */
+  model_layout?: Record<string, { x: number; y: number }>;
 }
 
 export interface ImportSummary {

@@ -3,6 +3,7 @@ import { newId, useStore } from "../store";
 import type { FieldItem, Page, Visual } from "../types";
 import { VisualHost } from "../visuals/VisualHost";
 import { addFieldToVisual, DRAG_MIME } from "../panes/wells";
+import { getData, importPbix, openProject } from "../actions";
 
 const GRID = 8;
 const snap = (n: number) => Math.round(n / GRID) * GRID;
@@ -25,6 +26,7 @@ export function ReportView() {
     return () => ro.disconnect();
   }, [page.width, page.height]);
 
+  const hasData = useStore((s) => s.model.tables.length > 0);
   const theme = report.theme ?? {};
   const onDrop = (e: React.DragEvent) => {
     const raw = e.dataTransfer.getData(DRAG_MIME);
@@ -40,6 +42,7 @@ export function ReportView() {
   return (
     <div className="report-view">
       <div className="canvas-wrap" ref={wrap} onMouseDown={(e) => e.target === e.currentTarget && useStore.getState().select(null)}>
+        <div className="canvas-sizer" style={{ width: page.width * scale, height: page.height * scale }}>
         <div
           className="canvas"
           style={{
@@ -59,13 +62,28 @@ export function ReportView() {
         >
           {page.visuals.length === 0 && (
             <div className="canvas-empty">
-              <h2>Página em branco</h2>
-              <p>Escolha uma visual no painel <b>Visualizações</b> ou arraste um campo para cá.</p>
+              {hasData ? (
+                <>
+                  <h2>Página em branco</h2>
+                  <p>Escolha uma visual no painel <b>Visualizações</b> ou arraste um campo para cá.</p>
+                </>
+              ) : (
+                <>
+                  <h1>Bem-vindo ao Free BI</h1>
+                  <p>Comece trazendo seus dados:</p>
+                  <div className="start-actions">
+                    <button className="primary" onClick={importPbix}>⇪ Importar relatório do Power BI (.pbix)</button>
+                    <button onClick={getData}>🛢 Obter dados (CSV, Excel, Parquet, JSON)</button>
+                    <button onClick={openProject}>📂 Abrir projeto .freebi</button>
+                  </div>
+                </>
+              )}
             </div>
           )}
           {page.visuals.map((v) => (
             <VisualFrame key={v.id} visual={v} page={page} scale={scale} />
           ))}
+        </div>
         </div>
       </div>
       <PageTabs />
