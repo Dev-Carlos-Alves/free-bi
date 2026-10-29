@@ -87,6 +87,8 @@ pub struct Measure {
     pub expression: String,
     #[serde(default)]
     pub format: Option<String>,
+    #[serde(default)]
+    pub folder: Option<String>,
 }
 
 /// Relação muitos-para-um: `from_table[from_column]` (lado N) → `to_table[to_column]` (lado 1).
@@ -114,6 +116,12 @@ pub struct TableMeta {
     pub steps: Vec<Step>,
     #[serde(default)]
     pub calc_columns: Vec<CalcColumn>,
+    /// Colunas calculadas que vieram prontas de um .pbix (valores importados, só referência).
+    #[serde(default)]
+    pub imported_calc_columns: Vec<CalcColumn>,
+    /// Consulta Power Query (M) original, quando importada de um .pbix.
+    #[serde(default)]
+    pub origin_query: Option<String>,
 }
 
 /// Referência a uma coluna, com parte de data opcional (hierarquia de datas).

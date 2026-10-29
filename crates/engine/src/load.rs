@@ -1,7 +1,7 @@
 //! Leitura de fontes de dados: CSV, Excel (xlsx/xlsm/xls/ods), Parquet e JSON.
 
 use anyhow::{anyhow, bail, Context, Result};
-use calamine::{open_workbook_auto, Data, Reader};
+use calamine::{open_workbook_auto, Data, DataType as _, Reader};
 use polars::prelude::*;
 use std::io::Cursor;
 use std::path::Path;

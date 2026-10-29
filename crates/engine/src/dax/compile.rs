@@ -43,6 +43,8 @@ pub struct Deferred {
 pub struct Compiler<'a> {
     pub cat: &'a Catalog,
     pub home: String,
+    /// Prefixo para nomes de colunas auxiliares (únicos por visual).
+    pub prefix: String,
     /// Tabelas referenciadas (para montar os joins).
     pub tables: RefCell<BTreeSet<String>>,
     pub deferred: RefCell<Vec<Deferred>>,
@@ -72,6 +74,7 @@ impl<'a> Compiler<'a> {
         Compiler {
             cat,
             home: home.to_string(),
+            prefix: String::new(),
             tables: RefCell::new(BTreeSet::new()),
             deferred: RefCell::new(Vec::new()),
             vars: RefCell::new(Vec::new()),
@@ -277,7 +280,7 @@ impl<'a> Compiler<'a> {
                 }
                 let inner = self.agg(self.arg(args, 0, "CALCULATE")?, m)?;
                 if remove_group {
-                    let alias = format!("__all{}", self.deferred.borrow().len());
+                    let alias = format!("__all{}_{}", self.prefix, self.deferred.borrow().len());
                     self.deferred.borrow_mut().push(Deferred { alias: alias.clone(), expr: inner });
                     col(alias).first()
                 } else {
