@@ -55,24 +55,52 @@ Os números foram conferidos contra o Power BI Desktop: os 12 cartões do relat�
 
 ## Instalar
 
-Os instaladores ficam na página **[Releases](https://github.com/Dev-Carlos-Alves/free-bi/releases)**. Eles também são gerados a cada atualização na aba **Actions**.
+> **Não baixe o ZIP do repositório** (botão verde **Code › Download ZIP**). Ele traz só o código-fonte, não o programa pronto.
+
+O programa pronto fica na página de versões:
+
+1. Abra **[github.com/Dev-Carlos-Alves/free-bi/releases/latest](https://github.com/Dev-Carlos-Alves/free-bi/releases/latest)**. Pelo site, é o link **Releases** na coluna da direita da página do repositório.
+2. Desça até a seção **Assets**, no fim da versão. Se ela estiver fechada, clique em **Assets** para abrir.
+3. Clique no arquivo do seu sistema (tabela abaixo). O download começa na hora e o arquivo vai para a pasta **Downloads**.
+
+| Seu computador | Arquivo para baixar (versão 0.1.0) |
+| --- | --- |
+| **Windows 10/11** | `Free.BI_0.1.0_x64-setup.exe` |
+| **Fedora** (RHEL, openSUSE) | `Free.BI-0.1.0-1.x86_64.rpm` |
+| **Ubuntu / Debian** | `Free.BI_0.1.0_amd64.deb` |
+| Outro Linux | `Free.BI_0.1.0_amd64.AppImage` |
+| macOS | o arquivo `.dmg` |
+
+Em versões novas, só o número (`0.1.0`) muda.
 
 ### Windows 10/11
 
-1. Baixe o `Free BI_x.y.z_x64-setup.exe`.
-2. Dê dois cliques e siga o assistente. Ele está em português, e dá para instalar só para você, sem precisar de administrador.
+1. Baixe o `Free.BI_0.1.0_x64-setup.exe` (veja os passos acima).
+2. Abra a pasta **Downloads** e dê dois cliques no arquivo.
 3. Se o Windows mostrar "O Windows protegeu o computador", clique em **Mais informações** e depois em **Executar assim mesmo**. O aviso aparece porque o instalador não tem uma assinatura digital paga, não porque haja algum problema.
-4. Abra pelo menu Iniciar, procurando "Free BI".
+4. Siga o assistente, que está em português. Dá para instalar só para você, sem precisar de administrador.
+5. Abra pelo menu Iniciar, procurando "Free BI".
 
-Também existe a versão `.msi`, útil para instalar em vários computadores.
+O `.msi` é a mesma coisa em outro formato, útil para TI instalar em vários computadores. Quem usa um computador só pode ignorar.
 
-### Fedora (e RHEL, CentOS Stream, openSUSE)
+### Fedora
+
+**Jeito mais fácil:** um comando só, que baixa e instala de uma vez. Abra o **Terminal** e cole:
 
 ```bash
-sudo dnf install ./Free.BI-x.y.z-1.x86_64.rpm
+sudo dnf install https://github.com/Dev-Carlos-Alves/free-bi/releases/download/v0.1.0/Free.BI-0.1.0-1.x86_64.rpm
 ```
 
-O `dnf` instala sozinho as dependências (WebKitGTK e GTK 3). Depois, procure "Free BI" no menu de aplicativos.
+Digite a sua senha do Linux quando ela for pedida (nada aparece enquanto você digita, é normal) e confirme com `s` ou `y`.
+
+**Ou, se você já baixou o `.rpm` pelo navegador:**
+
+```bash
+cd ~/Downloads
+sudo dnf install ./Free.BI-0.1.0-1.x86_64.rpm
+```
+
+O `./` na frente do nome é obrigatório, porque é ele que diz ao `dnf` que o arquivo está na pasta atual. O `dnf` instala sozinho as dependências (WebKitGTK e GTK 3). Depois, procure "Free BI" no menu de aplicativos (tecla Super).
 
 Para desinstalar:
 
@@ -83,14 +111,18 @@ sudo dnf remove free-bi
 ### Ubuntu e Debian
 
 ```bash
-sudo apt install ./Free.BI_x.y.z_amd64.deb
+cd ~/Downloads
+sudo apt install ./Free.BI_0.1.0_amd64.deb
 ```
 
 ### Qualquer outro Linux (AppImage)
 
+Não precisa instalar: basta dar permissão de execução e abrir.
+
 ```bash
-chmod +x Free.BI_x.y.z_amd64.AppImage
-./Free.BI_x.y.z_amd64.AppImage
+cd ~/Downloads
+chmod +x Free.BI_0.1.0_amd64.AppImage
+./Free.BI_0.1.0_amd64.AppImage
 ```
 
 ### macOS
