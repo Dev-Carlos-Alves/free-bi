@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { newId, useStore } from "../store";
+import { errorText, newId, useStore } from "../store";
+import { api, downloadServerFile, pickExportPath } from "../api";
+import { planFor } from "../queryBuilder";
 import type { FieldItem, Page, Visual } from "../types";
 import { VisualHost } from "../visuals/VisualHost";
 import { addFieldToVisual, DRAG_MIME } from "../panes/wells";
@@ -174,6 +176,7 @@ function VisualFrame({ visual, page, scale }: { visual: Visual; page: Page; scal
         <>
           <div className="resize" onMouseDown={(e) => startDrag(e, "resize")} />
           <div className="visual-tools">
+            <button title="Exportar dados (CSV)" onMouseDown={(e) => e.stopPropagation()} onClick={() => exportVisual(visual, page)}>⇩</button>
             <button title="Duplicar" onMouseDown={(e) => e.stopPropagation()} onClick={() => duplicate(visual)}>⧉</button>
             <button title="Excluir (Delete)" onMouseDown={(e) => e.stopPropagation()} onClick={() => remove(visual.id)}>✕</button>
           </div>
@@ -181,6 +184,22 @@ function VisualFrame({ visual, page, scale }: { visual: Visual; page: Page; scal
       )}
     </div>
   );
+}
+
+async function exportVisual(v: Visual, page: Page) {
+  const s = useStore.getState();
+  const plan = planFor(s.model, s.report, page, v, s.crossFilter);
+  if (!plan) return s.notify("Esta visual não tem dados para exportar.");
+  const name = `${(v.title ?? v.type).replace(/[\\/:*?"<>|]/g, "_")}.csv`;
+  const target = await pickExportPath(name, "csv");
+  if (!target) return;
+  try {
+    const r = await api.exportCsv(plan.query, target.path);
+    if (target.download) downloadServerFile(target.path);
+    s.notify(`${r.rows.toLocaleString("pt-BR")} linhas exportadas.`);
+  } catch (e) {
+    s.notify(errorText(e), "error");
+  }
 }
 
 function clamp(n: number, a: number, b: number) {

@@ -59,6 +59,17 @@ export async function pickSavePath(defaultName: string): Promise<{ path: string;
   return { path: ((await res.json()) as { path: string }).path, download: true };
 }
 
+/** Caminho para salvar um arquivo qualquer (CSV etc.). */
+export async function pickExportPath(defaultName: string, ext: string): Promise<{ path: string; download: boolean } | null> {
+  if (isTauri) {
+    const { save } = await import("@tauri-apps/plugin-dialog");
+    const r = await save({ defaultPath: defaultName, filters: [{ name: ext.toUpperCase(), extensions: [ext] }] });
+    return r ? { path: r, download: false } : null;
+  }
+  const res = await fetch(`/api/temp_path?name=${encodeURIComponent(defaultName)}`);
+  return { path: ((await res.json()) as { path: string }).path, download: true };
+}
+
 export function downloadServerFile(path: string) {
   const a = document.createElement("a");
   a.href = `/api/download?path=${encodeURIComponent(path)}`;
@@ -72,6 +83,7 @@ export const api = {
   reportSet: (report: Report) => call("report_set", { report }),
   queries: (queries: VisualQuery[]) => call<({ ok: QueryResult } | { error: string })[]>("queries", { queries }),
   query: (query: VisualQuery) => call<QueryResult>("query", { query }),
+  exportCsv: (query: VisualQuery, path: string) => call<{ rows: number }>("export_csv", { query, path }),
   tablePage: (table: string, offset: number, limit: number, sort?: string | null, desc?: boolean) =>
     call<QueryResult>("table_page", { table, offset, limit, sort, desc }),
   excelSheets: (path: string) => call<string[]>("excel_sheets", { path }),

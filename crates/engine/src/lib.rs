@@ -181,6 +181,32 @@ impl Engine {
                         .collect(),
                 )
             }
+            "export_csv" => {
+                // Exporta o resultado de uma visual em CSV no padrão do Excel brasileiro (; e vírgula decimal).
+                let q: VisualQuery = arg(args, "query")?;
+                let path: String = arg(args, "path")?;
+                let mut q = q;
+                q.limit = None;
+                let r = self.query(&q)?;
+                let cell = |v: &Value| -> String {
+                    match v {
+                        Value::Null => String::new(),
+                        Value::Number(n) => n.to_string().replace('.', ","),
+                        Value::String(s) if s.contains([';', '"', '\n']) => format!("\"{}\"", s.replace('"', "\"\"")),
+                        Value::String(s) => s.clone(),
+                        other => other.to_string(),
+                    }
+                };
+                let mut out = String::from("\u{feff}");
+                out.push_str(&r.columns.iter().map(|c| c.name.clone()).collect::<Vec<_>>().join(";"));
+                out.push('\n');
+                for row in &r.rows {
+                    out.push_str(&row.iter().map(cell).collect::<Vec<_>>().join(";"));
+                    out.push('\n');
+                }
+                std::fs::write(&path, out)?;
+                json!({ "rows": r.rows.len() })
+            }
             "table_page" => {
                 let table: String = arg(args, "table")?;
                 let offset = opt::<usize>(args, "offset").unwrap_or(0);
